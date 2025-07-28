@@ -1,8 +1,8 @@
 #!/bin/bash
 
-viash ns build --setup cb --parallel
+# viash ns build --setup cb --parallel
 
-NXF_JVM_ARGS="XX:+UnlockExperimentalVMOptions -d64 -XX:+UseG1GC -XX:ActiveProcessorCount=4 -XX:+AggressiveOpts -Xms4g -Xmx8g" \
+NXF_JVM_ARGS="-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:ActiveProcessorCount=4 -Xms4g -Xmx8g" \
   NXF_ENABLE_VIRTUAL_THREADS=1 \
   NXF_VER=24.04.6 \
   nextflow run . \

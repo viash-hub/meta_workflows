@@ -9,7 +9,6 @@ workflow run_wf {
 
   main:
     assertion_ch = input_ch
-      | niceView()
       | map { id, state ->
         if ( state.mode == "run" ) {
           println("Running in run mode")
@@ -51,11 +50,9 @@ workflow run_wf {
       | niceView()
 
     ht_ch = intermediate_ch
-      | niceView()
       | htrnaseq_runner.run(
         fromState: { id, state ->
-         [
-            // TODO: workaround  because demultiplex does not yet return results from the wf !!!
+          [
             input: state.fastq_output,
             barcodesFasta: state.barcodesFasta,
             genomeDir: state.genomeDir,
@@ -71,7 +68,6 @@ workflow run_wf {
         },
         toState: { id, state, result -> state + result }
       )
-      // | map{ id, state -> [ id, [:] ] }
 
     output_ch = ht_ch
 
