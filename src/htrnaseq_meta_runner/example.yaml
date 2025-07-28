@@ -1,0 +1,16 @@
+mode: run
+input: resources_test/demultiplex_htrnaseq_meta/SingleCell-RNA_P3_2
+# input: gs://viash-hub-resources/demultiplex/v3/demultiplex_htrnaseq_meta/SingleCell-RNA_P3_2
+
+# In pick mode, we do not need the inputs for the demuliplexing step
+# but we do need the fastq inputs for the htrnaseq part
+# mode: pick
+run_information: resources_test/demultiplex_htrnaseq_meta/SingleCell-RNA_P3_2/SampleSheet.csv
+demultiplexer: bclconvert
+
+project_id: my_proj_id
+experiment_id: my_exp_id
+barcodesFasta: resources_test/demultiplex_htrnaseq_meta/barcodes.fasta
+genomeDir: resources_test/demultiplex_htrnaseq_meta/gencode.v41.star.sparse
+annotation: resources_test/demultiplex_htrnaseq_meta/gencode.v41.annotation.gtf.gz
+# fastq_input: resources_test/demultiplex_htrnaseq_meta/fastq
