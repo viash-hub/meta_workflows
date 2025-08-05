@@ -24,20 +24,17 @@ workflow run_wf {
 
     // Should demuliplexing run, or not?
     demux_run_ch = input_ch
-      | filter{ id, state -> state.mode == "run" }
       | view{ "==== run mode ====" }
       | demultiplex_runner.run(
-        runIf: { id, state -> state.mode == "run" },
-        fromState: { id, state -> 
+        filter: { id, state -> state.mode == "run" },
+        fromState: 
           [
-            input: state.input,
-            run_information: state.run_information,
-            demultiplexer: state.demultiplexer,
-            plain_output: false,
-            skip_copy_complete_check: state.skip_copycomplete_check,
-          ]
-        },
-        toState: { id, state, result -> state + result }
+            "input": "input",
+            "run_information": "run_information",
+            "demultiplexer": "demultiplexer",
+            "skip_copy_complete_check": "skip_copycomplete_check",
+          ],
+        toState: { id, result, state -> state + result },
       )
 
     demux_donot_run_ch = input_ch
@@ -47,29 +44,27 @@ workflow run_wf {
 
     intermediate_ch = demux_run_ch
       | mix(demux_donot_run_ch)
-      | niceView()
 
     ht_ch = intermediate_ch
       | htrnaseq_runner.run(
-        fromState: { id, state ->
-          [
-            input: state.fastq_output,
-            barcodesFasta: state.barcodesFasta,
-            genomeDir: state.genomeDir,
-            annotation: state.annotation,
-            ignore: state.ignore,
-            umi_length: state.umi_length,
-            run_params: state.run_params,
-            project_id: state.project_id,
-            experiment_id: state.experiment_id,
-            fastq_publish_dir: state.fastq_publish_dir,
-            results_publish_dir: state.results_publish_dir
-          ]
-        },
-        toState: { id, state, result -> state + result }
+        fromState: [
+          "input": "fastq_output",
+          "barcodesFasta": "barcodesFasta",
+          "genomeDir": "genomeDir",
+          "annotation": "annotation",
+          "ignore": "ignore",
+          "umi_length": "umi_length",
+          "run_params": "run_params",
+          "project_id": "project_id",
+          "experiment_id": "experiment_id",
+          "fastq_publish_dir": "fastq_publish_dir",
+          "results_publish_dir": "results_publish_dir"
+        ],
+        toState: { id, result, state -> state + result }
       )
 
-    output_ch = ht_ch
+    output_ch = channel.empty()
+
 
   emit:
     output_ch

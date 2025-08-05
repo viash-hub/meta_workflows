@@ -11,7 +11,7 @@ viash_version: 0.9.4
 
 info:
   test_resources:
-    - path: gs://viash-hub-resources/demultiplex/v3/demultiplex_htrnaseq_meta/
+    - path: gs://viash-hub-resources/demultiplex/v4/demultiplex_htrnaseq_meta/
       dest: resources_test
 
 config_mods: |

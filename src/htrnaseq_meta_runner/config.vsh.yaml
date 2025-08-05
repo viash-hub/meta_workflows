@@ -136,26 +136,22 @@ test_resources:
     entrypoint: test_wf
 
 dependencies:
-  - name: demultiplex
-    repository: demultiplex
   - name: runner
     repository: demultiplex
     alias: demultiplex_runner
   - name: workflows/runner
     repository: htrnaseq
     alias: htrnaseq_runner
-  - name: io/publish
-    repository: demultiplex
 
 repositories:
   - name: demultiplex
     type: vsh
     repo: demultiplex
-    tag: v0.4.2
+    tag: v0.4.3
   - name: htrnaseq
     type: vsh
     repo: htrnaseq
-    tag: v0.8.2
+    tag: v0.9.1
 
 runners:
   - type: nextflow
