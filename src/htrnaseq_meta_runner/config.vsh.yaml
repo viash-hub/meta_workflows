@@ -1,0 +1,157 @@
+name: htrnaseq_meta_runner
+description: |
+  Demultiplexing of raw sequencing data and HT-RNAseq sequencing analysis.
+
+argument_groups:
+  - name: Workflow parameters
+    arguments:
+      - name: --mode
+        type: string
+        required: false
+        default: run
+        choices: ["pick", "run"]
+
+  - name: Metadata arguments
+    arguments:
+      - name: --id
+        description: Unique identifier for the run
+        type: string
+      - name: --project_id
+        description: Project ID
+        type: string
+        required: true
+      - name: --experiment_id
+        description: Experiment ID
+        type: string
+        required: true
+
+  ## Everything demultiplexing
+
+  - name: Demux input arguments
+    arguments:
+      - name: --input
+        description: |
+          Base directory of the canonical form `s3://<bucket>/<path>/<RunID>/`.
+          A tarball (tar.gz, .tgz, .tar) containing run information can be provided in which
+          case the RunID is set to the name of the tarball without the extension.
+        type: file
+        required: false
+      - name: --run_information
+        description: |
+          CSV file containing sample information, which will be used as 
+          input for the demultiplexer. Canonically called 'SampleSheet.csv' (Illumina)
+          or 'RunManifest.csv' (Element Biosciences). If not specified,
+          will try to autodetect the sample sheet in the input directory.
+          Requires --demultiplexer to be set.
+        type: file
+        required: false
+      - name: --demultiplexer
+        type: string
+        required: false
+        choices: ["bases2fastq", "bclconvert"]
+        description: |
+          Demultiplexer to use, choice depends on the provider
+          of the instrument that was used to generate the data.
+          When not using --run_information, specifying this argument is not
+          required.
+
+  - name: Demux output arguments
+    arguments:
+      - name: --fastq_output
+        type: file
+        direction: output
+        default: "fastq"
+      - name: --sample_qc_output
+        type: file
+        direction: output
+        default: "qc/fastqc"
+      - name: --multiqc_output
+        type: file
+        direction: output
+        default: "qc/multiqc_report.html"
+      - name: --demultiplexer_logs
+        type: file
+        direction: output
+        default: "demultiplexer_logs"
+
+  - name: "Other arguments"
+    arguments:
+      - name: --skip_copycomplete_check
+        type: boolean_true
+        description: |
+          Disable the check for the presence of a "CopyComplete.txt" file in input
+          directory in case of Illumina data.
+
+  ## HT-related stuff
+  
+  - name: HT Input arguments
+    arguments:
+      - name: --fastq_input
+        description: Base directory of the form `s3:/<bucket>/Sequencing/<Sequencer>/<RunID>/<demultiplex_dir>`
+        type: file
+        required: false
+      - name: --barcodesFasta
+        type: file
+        required: true
+      - name: --genomeDir
+        type: file
+        required: true
+      - name: --annotation
+        type: file
+        required: true
+      - name: --ignore
+        description: "Pool names to ignore."
+        type: string
+        multiple: true
+        default: ["Undetermined"]
+      - name: --umi_length
+        description: |
+          Length of the UMI sequences
+        type: integer
+        min: 1
+        default: 10
+      - name: --run_params
+        type: file
+        required: false
+        direction: output
+        default: params.yaml
+
+  - name: HT ouput arguments
+    arguments:
+      - name: --fastq_publish_dir
+        type: string
+        required: true
+      - name: --results_publish_dir
+        type: string
+        required: true
+
+resources:
+  - type: nextflow_script
+    path: main.nf
+    entrypoint: run_wf
+
+test_resources:
+  - type: nextflow_script
+    path: test.nf
+    entrypoint: test_wf
+
+dependencies:
+  - name: runner
+    repository: demultiplex
+    alias: demultiplex_runner
+  - name: workflows/runner
+    repository: htrnaseq
+    alias: htrnaseq_runner
+
+repositories:
+  - name: demultiplex
+    type: vsh
+    repo: demultiplex
+    tag: v0.4.3
+  - name: htrnaseq
+    type: vsh
+    repo: htrnaseq
+    tag: v0.9.1
+
+runners:
+  - type: nextflow
