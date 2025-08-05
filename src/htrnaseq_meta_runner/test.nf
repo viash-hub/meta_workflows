@@ -182,14 +182,14 @@ workflow test_wf {
             def star_output = file("${expected_result_dir}/star_output", type: 'any')
             assert star_output.isDirectory()
             
-            assert files("${star_output}/*", type: 'any').collect{it.name}.toSet() == sample_file_basenames.findAll{it != "Undetermined_S0"}.toSet()
+            assert files("${star_output}/*", type: 'any').collect{it.name}.toSet() == sample_file_basenames.findAll{it != "Undetermined_S0"}.collect{it - ~/_S[0-9]+$/}.toSet()
             def expected_barcodes = [
                 "TCACACCTCCAAGCTA", "GTTAGTGGTCCACATA", "GAGGGATTCGGTGCAC", "CTCTCAGCACTACGGC", "CAGGGCTGTAACGCGA",
                 "TCACACCAGGCTAAAT", "GGCAGTCTCTTGCAAG" ,"GACATCAAGGAAAGAC" ,"CCTCACATCGTTCTAT", "AAGCAGTGGTATCAAC"
             ]
-            for (well_id in sample_file_basenames.findAll{it != "Undetermined_S0"}) {
-                assert files("${star_output}/${well_id}/*", type: 'any').collect{it.name}.toSet() == expected_barcodes.toSet()
-            } 
+            sample_file_basenames.findAll{it != "Undetermined_S0"}.collect{it - ~/_S[0-9]+$/}.each{
+                assert files("${star_output}/${it}/*", type: 'any').collect{it.name}.toSet() == expected_barcodes.toSet()
+            }
             
             assert file("${expected_result_dir}/report.html").isFile()
             assert file("${expected_result_dir}/params.yaml").isFile()
